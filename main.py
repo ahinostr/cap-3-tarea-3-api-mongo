@@ -9,7 +9,9 @@ from datetime import datetime
 app = FastAPI()
 
 # MongoDB connection
-client = MongoClient("mongodb://localhost:27017")
+#client = MongoClient("mongodb://localhost:27017")
+client = MongoClient("mongodb+srv://ahinostr:VrdrI6NWBkfLtEnO@cluster0.1wrz1.mongodb.net/")
+
 db = client["fastapi"]
 posts_collection = db["post"]
 
@@ -27,7 +29,7 @@ class PostCreate(BaseModel):
 # Route for home page (index)
 @app.get("/")
 async def index():
-    return JSONResponse(content={"message": "Welcome to the API"})
+    return JSONResponse(content={"message": "Bienvenidos al API"})
 
 # Route to get all posts
 @app.get("/post", response_model=List[Post])
@@ -48,7 +50,7 @@ async def get_all_post():
 async def get_one_post(post_id: str):
     post = posts_collection.find_one({"_id": ObjectId(post_id)})
     if post is None:
-        raise HTTPException(status_code=404, detail="Post not found")
+        raise HTTPException(status_code=404, detail="Post no encontrado")
     return Post(
         id=str(post["_id"]),
         title=post["title"],
@@ -60,7 +62,7 @@ async def get_one_post(post_id: str):
 @app.post("/post/create", response_model=Post)
 async def create_one_post(post: PostCreate):
     if not post.title:
-        raise HTTPException(status_code=400, detail="Title is required")
+        raise HTTPException(status_code=400, detail="Title es requerido")
     
     created_time = datetime.now()
     new_post = {"title": post.title, "content": post.content, "created": created_time}
@@ -80,10 +82,10 @@ async def edit_one_post(post_id: str, post: PostCreate):
     existing_post = posts_collection.find_one({"_id": ObjectId(post_id)})
 
     if existing_post is None:
-        raise HTTPException(status_code=404, detail="Post not found")
+        raise HTTPException(status_code=404, detail="Post no encontrado")
 
     if not post.title:
-        raise HTTPException(status_code=400, detail="Title is required")
+        raise HTTPException(status_code=400, detail="Title es requerido")
 
     updated_post = {"title": post.title, "content": post.content}
     posts_collection.update_one({"_id": ObjectId(post_id)}, {"$set": updated_post})
@@ -102,10 +104,10 @@ async def delete_one_post(post_id: str):
     post = posts_collection.find_one({"_id": ObjectId(post_id)})
 
     if post is None:
-        raise HTTPException(status_code=404, detail="Post not found")
+        raise HTTPException(status_code=404, detail="Post no encontrado")
 
     posts_collection.delete_one({"_id": ObjectId(post_id)})
-    return {"message": "Post deleted successfully"}
+    return {"message": "Post Borrado Satisfactoriamente"}
 
 # # Start the server
 # if __name__ == "__main__":
